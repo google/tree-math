@@ -22,6 +22,7 @@ base_requires = [
 ]
 tests_requires = [
     'absl-py',
+    'jaxlib',
     'numpy>=1.17',
     'pytest',
 ]

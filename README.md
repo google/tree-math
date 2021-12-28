@@ -14,23 +14,20 @@ unlike the [implementation in JAX](https://github.com/google/jax/blob/b5aea7bc2d
 ```python
 import functools
 from jax import lax
-import tree_math
+import tree_math as tm
 import tree_math.numpy as tnp
 
-@functools.partial(tree_math.wrap, vector_argnames=['b', 'x0'])
+@functools.partial(tm.wrap, vector_argnames=['b', 'x0'])
 def cg(A, b, x0, M=lambda x: x, maxiter=5, tol=1e-5, atol=0.0):
   """jax.scipy.sparse.linalg.cg, written with tree_math."""
-  A = tree_math.unwrap(A)
-  M = tree_math.unwrap(M)
+  A = tm.unwrap(A)
+  M = tm.unwrap(M)
 
-  # tolerance handling uses the "non-legacy" behavior of scipy.sparse.linalg.cg
-  bs = b @ b
-  atol2 = tnp.maximum(tol**2 * bs, atol**2)
+  atol2 = tnp.maximum(tol**2 * (b @ b), atol**2)
 
   def cond_fun(value):
     x, r, gamma, p, k = value
-    rs = r @ r
-    return (rs > atol2) & (k < maxiter)
+    return (r @ r > atol2) & (k < maxiter)
 
   def body_fun(value):
     x, r, gamma, p, k = value

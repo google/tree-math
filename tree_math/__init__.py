@@ -22,3 +22,5 @@ from tree_math._src.func_wrappers import (
 )
 from tree_math._src.vector import Vector
 import tree_math.numpy
+
+__version__ = '0.1.0'

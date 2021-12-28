@@ -53,20 +53,15 @@ class TreeMathTest(test_util.TestCase):
 
     @functools.partial(tm.wrap, vector_argnames=["b", "x0"])
     def cg(A, b, x0, M=lambda x: x, maxiter=5, tol=1e-5, atol=0.0):
+      """jax.scipy.sparse.linalg.cg, written with tree_math."""
       A = tm.unwrap(A)
       M = tm.unwrap(M)
 
-      # tolerance handling uses the "non-legacy" behavior of
-      # scipy.sparse.linalg.cg
-      bs = b @ b
-      atol2 = tnp.maximum(tol**2 * bs, atol**2)
-
-      # https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method
+      atol2 = tnp.maximum(tol**2 * (b @ b), atol**2)
 
       def cond_fun(value):
-        _, r, _, _, k = value
-        rs = r @ r
-        return (rs > atol2) & (k < maxiter)
+        x, r, gamma, p, k = value  # pylint: disable=unused-variable
+        return (r @ r > atol2) & (k < maxiter)
 
       def body_fun(value):
         x, r, gamma, p, k = value
