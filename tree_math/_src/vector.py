@@ -64,7 +64,7 @@ def broadcasting_map(func, *args):
         )
   if not vector_args:
     return func2()  # result is a scalar
-  _flatten_together(*[arg.tree for arg in vector_args])  # check shapes
+  _flatten_together(*[arg for arg in vector_args])  # check shapes
   return tree_util.tree_map(func2, *vector_args)
 
 
@@ -118,37 +118,16 @@ def dot(left, right, *, precision="highest"):
   def _vector_dot(a, b):
     return jnp.dot(jnp.ravel(a), jnp.ravel(b), precision=precision)
 
-  (left_values, right_values), _ = _flatten_together(left.tree, right.tree)
+  (left_values, right_values), _ = _flatten_together(left, right)
   parts = map(_vector_dot, left_values, right_values)
   return functools.reduce(operator.add, parts)
 
-
-@tree_util.register_pytree_node_class
-class Vector:
+class VectorBase:
   """A wrapper for treating an arbitrary pytree as a 1D vector."""
-
-  def __init__(self, tree):
-    self._tree = tree
-
-  @property
-  def tree(self):
-    return self._tree
-
-  # TODO(shoyer): consider casting to a common dtype?
-
-  def __repr__(self):
-    return f"tree_math.Vector({self._tree!r})"
-
-  def tree_flatten(self):
-    return (self.tree,), None
-
-  @classmethod
-  def tree_unflatten(cls, _, args):
-    return cls(*args)
 
   @property
   def size(self):
-    values = tree_util.tree_leaves(self.tree)
+    values = tree_util.tree_leaves(self)
     return sum(jnp.size(value) for value in values)
 
   def __len__(self):
@@ -164,7 +143,7 @@ class Vector:
 
   @property
   def dtype(self):
-    values = tree_util.tree_leaves(self.tree)
+    values = tree_util.tree_leaves(self)
     return jnp.result_type(*values)
 
   # comparison
@@ -225,3 +204,28 @@ class Vector:
   def max(self):
     parts = map(jnp.max, tree_util.tree_leaves(self))
     return jnp.asarray(list(parts)).max()
+
+@tree_util.register_pytree_node_class
+class Vector:
+  """A wrapper for treating an arbitrary pytree as a 1D vector."""
+
+  def __init__(self, tree):
+    self._tree = tree
+
+  @property
+  def tree(self):
+    return self._tree
+
+  # TODO(shoyer): consider casting to a common dtype?
+
+  def __repr__(self):
+    return f"tree_math.Vector({self._tree!r})"
+
+  def tree_flatten(self):
+    return (self._tree,), None
+
+  @classmethod
+  def tree_unflatten(cls, _, args):
+    return cls(*args)
+
+  
