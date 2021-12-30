@@ -166,14 +166,10 @@ class VectorTest(test_util.TestCase):
 
     v1 = CustomVector(1, 2.0)
     v2 = v1 + 3
-    assert isinstance(v2, CustomVector)
-    assert v2.a == 4
-    assert np.isclose(v2.b, 5.0)
+    self.assertTreeEqual(v2, CustomVector(4, 5.0), check_dtypes=True)
 
     v3 = v2 + v1
-    assert isinstance(v3, CustomVector)
-    assert v3.a == 5
-    assert np.isclose(v3.b, 7.0)
+    self.assertTreeEqual(v3, CustomVector(5, 7.0), check_dtypes=True)
         
 
 
