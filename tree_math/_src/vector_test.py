@@ -148,6 +148,34 @@ class VectorTest(test_util.TestCase):
     self.assertTreeEqual(vector.min(), 1, check_dtypes=False)
     self.assertTreeEqual(vector.max(), 4, check_dtypes=False)
 
+  def test_custom_class(self):
+    
+    @tree_util.register_pytree_node_class
+    class CustomVector(tm.VectorBase):
+
+      def __init__(self, a: int, b: float):
+        self.a = a
+        self.b = b
+
+      def tree_flatten(self):
+        return (self.a, self.b), None
+
+      @classmethod
+      def tree_unflatten(cls, _, args):
+        return cls(*args)
+
+    v1 = CustomVector(1, 2.0)
+    v2 = v1 + 3
+    assert isinstance(v2, CustomVector)
+    assert v2.a == 4
+    assert np.isclose(v2.b, 5.0)
+
+    v3 = v2 + v1
+    assert isinstance(v3, CustomVector)
+    assert v3.a == 5
+    assert np.isclose(v3.b, 7.0)
+        
+
 
 if __name__ == "__main__":
   absltest.main()
