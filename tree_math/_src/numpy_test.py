@@ -49,7 +49,7 @@ class NumpyTest(test_util.TestCase):
     actual = tnp.where(True, 1, 2)
     self.assertTreeEqual(actual, expected, check_dtypes=False)
     with self.assertRaisesRegex(
-        TypeError, "non-tree_math.Vector argument is not a scalar",
+        TypeError, "non-tree_math.VectorBase argument is not a scalar",
     ):
       tnp.where(True, jnp.array([1, 2]), 3)
 
