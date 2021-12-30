@@ -20,7 +20,7 @@ from tree_math._src.func_wrappers import (
     wrap,
     unwrap,
 )
-from tree_math._src.vector import Vector, VectorBase
+from tree_math._src.vector import Vector, VectorMixin
 import tree_math.numpy
 
 __version__ = '0.1.0'

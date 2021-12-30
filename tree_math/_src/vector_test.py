@@ -58,7 +58,7 @@ class VectorTest(test_util.TestCase):
     self.assertTreeEqual(vector + 1, expected, check_dtypes=True)
     self.assertTreeEqual(1 + vector, expected, check_dtypes=True)
     with self.assertRaisesRegex(
-        TypeError, "non-tree_math.VectorBase argument is not a scalar",
+        TypeError, "non-tree_math.VectorMixin argument is not a scalar",
     ):
       vector + jnp.ones((3,))  # pylint: disable=expression-not-assigned
 
@@ -123,7 +123,7 @@ class VectorTest(test_util.TestCase):
     self.assertAllClose(actual, expected)
 
     with self.assertRaisesRegex(
-        TypeError, "matmul arguments must both be tree_math.VectorBase objects",
+        TypeError, "matmul arguments must both be tree_math.VectorMixin objects",
     ):
       vector1 @ jnp.ones((7,))  # pylint: disable=expression-not-assigned
 
@@ -151,7 +151,7 @@ class VectorTest(test_util.TestCase):
   def test_custom_class(self):
     
     @tree_util.register_pytree_node_class
-    class CustomVector(tm.VectorBase):
+    class CustomVector(tm.VectorMixin):
 
       def __init__(self, a: int, b: float):
         self.a = a

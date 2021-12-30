@@ -53,14 +53,14 @@ def _argnums_partial(f, args, static_argnums):
 
 def broadcasting_map(func, *args):
   """Like tree_map, but scalar arguments are broadcast to all leaves."""
-  static_argnums = [i for i, x in enumerate(args) if not isinstance(x, VectorBase)]
+  static_argnums = [i for i, x in enumerate(args) if not isinstance(x, VectorMixin)]
   func2, vector_args = _argnums_partial(func, args, static_argnums)
   for arg in args:
-    if not isinstance(arg, VectorBase):
+    if not isinstance(arg, VectorMixin):
       shape = jnp.shape(arg)
       if shape:
         raise TypeError(
-            f"non-tree_math.VectorBase argument is not a scalar: {arg!r}"
+            f"non-tree_math.VectorMixin argument is not a scalar: {arg!r}"
         )
   if not vector_args:
     return func2()  # result is a scalar
@@ -112,8 +112,8 @@ def dot(left, right, *, precision="highest"):
   Returns:
     Resulting dot product (scalar).
   """
-  if not isinstance(left, VectorBase) or not isinstance(right, VectorBase):
-    raise TypeError("matmul arguments must both be tree_math.VectorBase objects")
+  if not isinstance(left, VectorMixin) or not isinstance(right, VectorMixin):
+    raise TypeError("matmul arguments must both be tree_math.VectorMixin objects")
 
   def _vector_dot(a, b):
     return jnp.dot(jnp.ravel(a), jnp.ravel(b), precision=precision)
@@ -122,7 +122,7 @@ def dot(left, right, *, precision="highest"):
   parts = map(_vector_dot, left_values, right_values)
   return functools.reduce(operator.add, parts)
 
-class VectorBase:
+class VectorMixin:
   """A mixin class that adds a 1D vector-like behaviour to any custom pytree class."""
 
   @property
@@ -206,7 +206,7 @@ class VectorBase:
     return jnp.asarray(list(parts)).max()
 
 @tree_util.register_pytree_node_class
-class Vector(VectorBase):
+class Vector(VectorMixin):
   """A wrapper for treating an arbitrary pytree as a 1D vector."""
 
   def __init__(self, tree):
