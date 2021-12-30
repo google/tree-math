@@ -123,7 +123,7 @@ def dot(left, right, *, precision="highest"):
   return functools.reduce(operator.add, parts)
 
 class VectorBase:
-  """A wrapper for treating an arbitrary pytree as a 1D vector."""
+  """A mixin class that adds a 1D vector-like behaviour to any custom pytree class."""
 
   @property
   def size(self):
