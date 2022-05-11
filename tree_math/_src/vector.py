@@ -53,7 +53,9 @@ def _argnums_partial(f, args, static_argnums):
 
 def broadcasting_map(func, *args):
   """Like tree_map, but scalar arguments are broadcast to all leaves."""
-  static_argnums = [i for i, x in enumerate(args) if not isinstance(x, VectorMixin)]
+  static_argnums = [
+      i for i, x in enumerate(args) if not isinstance(x, VectorMixin)
+  ]
   func2, vector_args = _argnums_partial(func, args, static_argnums)
   for arg in args:
     if not isinstance(arg, VectorMixin):
@@ -113,7 +115,8 @@ def dot(left, right, *, precision="highest"):
     Resulting dot product (scalar).
   """
   if not isinstance(left, VectorMixin) or not isinstance(right, VectorMixin):
-    raise TypeError("matmul arguments must both be tree_math.VectorMixin objects")
+    raise TypeError(
+        "matmul arguments must both be tree_math.VectorMixin objects")
 
   def _vector_dot(a, b):
     return jnp.dot(jnp.ravel(a), jnp.ravel(b), precision=precision)
@@ -121,6 +124,7 @@ def dot(left, right, *, precision="highest"):
   (left_values, right_values), _ = _flatten_together(left, right)
   parts = map(_vector_dot, left_values, right_values)
   return functools.reduce(operator.add, parts)
+
 
 class VectorMixin:
   """A mixin class that adds a 1D vector-like behaviour to any custom pytree class."""
@@ -205,6 +209,7 @@ class VectorMixin:
     parts = map(jnp.max, tree_util.tree_leaves(self))
     return jnp.asarray(list(parts)).max()
 
+
 @tree_util.register_pytree_node_class
 class Vector(VectorMixin):
   """A wrapper for treating an arbitrary pytree as a 1D vector."""
@@ -227,5 +232,3 @@ class Vector(VectorMixin):
   @classmethod
   def tree_unflatten(cls, _, args):
     return cls(*args)
-
-  
