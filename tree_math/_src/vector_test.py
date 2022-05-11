@@ -18,9 +18,9 @@ from absl.testing import absltest
 from absl.testing import parameterized
 from jax import tree_util
 import jax.numpy as jnp
+import numpy as np
 import tree_math as tm
 from tree_math._src import test_util
-import numpy as np
 
 # pylint: disable=g-complex-comprehension
 
@@ -123,7 +123,8 @@ class VectorTest(test_util.TestCase):
     self.assertAllClose(actual, expected)
 
     with self.assertRaisesRegex(
-        TypeError, "matmul arguments must both be tree_math.VectorMixin objects",
+        TypeError,
+        "matmul arguments must both be tree_math.VectorMixin objects",
     ):
       vector1 @ jnp.ones((7,))  # pylint: disable=expression-not-assigned
 
@@ -149,7 +150,7 @@ class VectorTest(test_util.TestCase):
     self.assertTreeEqual(vector.max(), 4, check_dtypes=False)
 
   def test_custom_class(self):
-    
+
     @tree_util.register_pytree_node_class
     class CustomVector(tm.VectorMixin):
 
@@ -170,7 +171,6 @@ class VectorTest(test_util.TestCase):
 
     v3 = v2 + v1
     self.assertTreeEqual(v3, CustomVector(5, 7.0), check_dtypes=True)
-        
 
 
 if __name__ == "__main__":
