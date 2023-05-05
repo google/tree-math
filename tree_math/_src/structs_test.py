@@ -1,5 +1,17 @@
-"""Tests for global_circulation.structs."""
-
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import pickle
 from typing import Union
 
 from absl.testing import absltest
@@ -10,6 +22,9 @@ import jax.numpy as jnp
 import numpy as np
 import tree_math
 
+from tree_math._src import test_util
+
+
 ArrayLike = Union[jnp.ndarray, np.ndarray, float]
 
 
@@ -19,7 +34,7 @@ class TestStruct:
   b: ArrayLike
 
 
-class StructsTest(parameterized.TestCase):
+class StructsTest(test_util.TestCase):
 
   @parameterized.named_parameters(
       dict(testcase_name='Scalars', x=TestStruct(1., 2.)),
@@ -88,6 +103,11 @@ class StructsTest(parameterized.TestCase):
     unjitted = operation(x, y)
     np.testing.assert_allclose(jitted.a, unjitted.a)
     np.testing.assert_allclose(jitted.b, unjitted.b)
+
+  def testPickle(self):
+    struct = TestStruct(1, 2)
+    restored = pickle.loads(pickle.dumps(struct))
+    self.assertTreeEqual(struct, restored, check_dtypes=True)
 
 
 if __name__ == '__main__':
