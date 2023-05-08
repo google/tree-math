@@ -27,22 +27,20 @@ def struct(cls):
   transformations such as `jit` and `grad`.
 
   Example usage:
-
   ```
-  @struct
+  import jax
+  import tree_math
+
+  @tree_math.struct
   class Point:
     x: float
     y: float
 
-  a = Point(0., 1.)
-  b = Point(1., 1.)
+  a = Point(0.0, 1.0)
+  b = Point(2.0, 3.0)
 
-  a + 3 * b  # Point(3., 4.)
-
-  def norm_squared(pt):
-    return pt.x**2 + pt.y**2
-
-  jax.jit(jax.grad(norm))(b)  # Point(2., 2.)
+  a + 3 * b  # Point(6.0, 10.0)
+  jax.grad(lambda x, y: x @ y)(a, b)  # Point(2.0, 3.0)
   ```
 
   Args:

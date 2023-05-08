@@ -65,8 +65,9 @@ from the `.tree` property:
 ```
 
 As an alternative to manipulating `Vector` objects directly, you can also use
-the functional transformations `wrap` and `unwrap` (see the "Example usage"
-below).
+the functional transformations `wrap` and `unwrap` (see the "Writing an
+algorithm" below). Or you can create your own `Vector`-like objects from a pytree with
+`VectorMixin` or `tree_math.struct` (see "Custom vector classes" below).
 
 One important difference between `tree_math` and `jax.numpy` is that dot
 products in `tree_math` default to full precision on all platforms, rather
@@ -74,17 +75,19 @@ than defaulting to bfloat16 precision on TPUs. This is useful for writing most
 numerical algorithms, and will likely be JAX's default behavior
 [in the future](https://github.com/google/jax/pull/7859).
 
-In the near-term, we also plan to add a `Matrix` class that will make it
-possible to use tree-math for numerical algorithms such as
+It would be nice to have a `Matrix` class to make it possible to use tree-math
+for numerical algorithms such as
 [L-BFGS](https://en.wikipedia.org/wiki/Limited-memory_BFGS) which use matrices
-to represent stacks of vectors.
+to represent stacks of vectors. If you're interesting in contributing this
+feature, please comment on [this GitHub issue](https://github.com/google/tree-math/issues/6).
 
-## Example usage
+### Writing an algorithm
 
 Here is how we could write the preconditioned conjugate gradient
 method. Notice how similar the implementation is to the [pseudocode from
 Wikipedia](https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method),
-unlike the [implementation in JAX](https://github.com/google/jax/blob/b5aea7bc2da4fb5ef96c87a59bfd1486d8958dd7/jax/_src/scipy/sparse/linalg.py#L111-L121):
+unlike the [implementation in JAX](https://github.com/google/jax/blob/b5aea7bc2da4fb5ef96c87a59bfd1486d8958dd7/jax/_src/scipy/sparse/linalg.py#L111-L121).
+Both versions support arbitrary pytrees as input:
 
 ```python
 import functools
@@ -123,4 +126,29 @@ def cg(A, b, x0, M=lambda x: x, maxiter=5, tol=1e-5, atol=0.0):
 
   x_final, *_ = lax.while_loop(cond_fun, body_fun, initial_value)
   return x_final
+```
+
+### Custom vector classes
+
+You can also make your own classes directly support math like `Vector`. To do
+so, either inherit from `tree_math.VectorMixin` on your pytree class, or use
+`tree_math.struct` (similar to
+[`flax.struct`](https://flax.readthedocs.io/en/latest/api_reference/flax.struct.html))
+to create pytree and tree math supporting
+[dataclass](https://docs.python.org/3/library/dataclasses.html):
+
+```python
+import jax
+import tree_math
+
+@tree_math.struct
+class Point:
+  x: float | jax.Array
+  y: float | jax.Array
+
+a = Point(0.0, 1.0)
+b = Point(2.0, 3.0)
+
+a + 3 * b  # Point(6.0, 10.0)
+jax.grad(lambda x, y: x @ y)(a, b)  # Point(2.0, 3.0)
 ```
