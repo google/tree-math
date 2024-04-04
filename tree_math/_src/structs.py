@@ -72,6 +72,7 @@ def struct(cls):
                        {'fields': fields,
                         'asdict': asdict,
                         'astuple': astuple,
+                        'replace': dataclasses.replace,
                         'tree_flatten': tree_flatten,
                         'tree_unflatten': tree_unflatten,
                         '__module__': cls.__module__})

@@ -109,6 +109,12 @@ class StructsTest(test_util.TestCase):
     restored = pickle.loads(pickle.dumps(struct))
     self.assertTreeEqual(struct, restored, check_dtypes=True)
 
+  def testReplace(self):
+    struct = TestStruct(1, 2)
+    replaced = struct.replace(b=3)
+    expected = TestStruct(1, 3)
+    self.assertTreeEqual(replaced, expected, check_dtypes=True)
+
 
 if __name__ == '__main__':
   absltest.main()
