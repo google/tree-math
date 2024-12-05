@@ -104,7 +104,7 @@ def dot(left, right, *, precision="highest"):
   Note that unlike jax.numpy.dot, tree_math.dot defaults to full (highest)
   precision. This is more useful for numerical algorithms and will be the
   default for jax.numpy in the future:
-  https://github.com/google/jax/pull/7859
+  https://github.com/jax-ml/jax/pull/7859
 
   Args:
     left: left argument.
