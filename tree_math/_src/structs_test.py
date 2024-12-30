@@ -30,8 +30,14 @@ ArrayLike = Union[jnp.ndarray, np.ndarray, float]
 
 @tree_math.struct
 class TestStruct:
-  a: ArrayLike
-  b: ArrayLike
+    a: ArrayLike
+    b: ArrayLike
+    static_field: int = 0   # This will be a static field
+
+    # Define static fields as a class variable
+    static_fields = ['static_field']  # Specify which fields are static
+
+
 
 
 class StructsTest(test_util.TestCase):
